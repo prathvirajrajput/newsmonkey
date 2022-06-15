@@ -7,23 +7,27 @@ const News = (props) => {
   const [articles, setArticles] = useState([]);
   const [page, setPage] = useState(1);
   const [totalReults, setTotalResults] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const updateNews = async () => {
     let url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=12ffc8bc69414eb1a9cf4458da2512b6&page=${page}`;
-    let data = await fetch(url);
-    let parsedData = await data.json();
-    console.log(parsedData);
-    setArticles(parsedData.articles);
-    setTotalResults(parsedData.totalReults);
+    setLoading(true);
+    await fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        setArticles(data.articles);
+        setTotalResults(data.totalReults);
+      })
+      .catch((error) => console.log("error"))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-    updateNews()
+    updateNews();
   }, []);
 
-
   const fetchMoreData = async () => {
-    const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=12ffc8bc69414eb1a9cf4458da2512b6&page=${page+1}`;
+    const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=12ffc8bc69414eb1a9cf4458da2512b6&page=${page + 1}`;
     setPage(page + 1);
     let data = await fetch(url);
     let parsedData = await data.json();
@@ -33,29 +37,28 @@ const News = (props) => {
 
   return (
     <>
-      <h2 className="text-center" style={{marginTop:'70px'}}>NewsMonkey-Top {props.category} Headlines</h2>
-      <InfiniteScroll
-        dataLength={articles.length}
-        next={fetchMoreData}
-        hasMore={articles.length !== totalReults}
-      >
-        <div className="container">
-          <div className="row">
-            {articles.map((element) => {
-              return (
-                <div className="col-md-4" key={element.url}>
-                  <NewsItem
-                    title={element.title}
-                    description={element.description}
-                    imgUrl={element.urlToImage}
-                    newsUrl={element.url}
-                    date={element.publishedAt}
-                  />
-                </div>
-              );
-            })}
+      <h2 className="text-center" style={{ marginTop: "70px" }}>
+        NewsMonkey-Top {props.category} Headlines
+      </h2>
+      <InfiniteScroll dataLength={articles.length} next={fetchMoreData} hasMore={articles.length !== totalReults}>
+        {loading ? (
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", margin: "10px" }}>
+            <h2>Loading...</h2>
+            <label>please wait while loading</label>
           </div>
-        </div>
+        ) : (
+          <div className="container">
+            <div className="row">
+              {articles.map((element) => {
+                return (
+                  <div className="col-md-4" key={element.url}>
+                    <NewsItem title={element.title} description={element.description} imgUrl={element.urlToImage} newsUrl={element.url} date={element.publishedAt} />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </InfiniteScroll>
     </>
   );
