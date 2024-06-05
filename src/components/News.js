@@ -43,7 +43,7 @@ const News = (props) => {
       <InfiniteScroll dataLength={articles.length} next={fetchMoreData} hasMore={articles.length !== totalReults}>
         {loading ? (
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", margin: "10px" }}>
-            <h2>Loading...</h2>
+            <h2 style={{ fontSize: "25px" }}>Loading...</h2>
             <label>please wait while loading</label>
           </div>
         ) : (
